@@ -1,4 +1,4 @@
 images/*
-vscode/
-node_modules/
+.vscode
+node_modules
 .env
