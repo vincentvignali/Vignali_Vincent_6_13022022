@@ -40,6 +40,7 @@ exports.getOne = (req, res, next) => {
 
 exports.updateOne = (req, res, next) => {
   console.log("🏋🏼‍♀️🏋🏼‍♀️🏋🏼‍♀️🏋🏼‍♀️ | Im in the controller, updateOne Function");
+  console.log("🏋🏼‍♀️🏋🏼‍♀️🏋🏼‍♀️🏋🏼‍♀️", req.body);
   // Retrieve the product ID
   const productId = req.params.id;
 
@@ -47,31 +48,33 @@ exports.updateOne = (req, res, next) => {
   const sauceObject = req.file
     ? {
         ...JSON.parse(req.body.sauce),
-        // TODO: how this interpollation works?
         imageUrl: `${req.protocol}://${req.get("host")}/images/${
           req.file.filename
         }`,
       }
     : { ...req.body };
+  console.log(sauceObject);
   // TODO: WHY this delete ?
   delete sauceObject._userId;
 
   Sauce.findOne({ _id: productId })
     .then((foundSauce) => {
-      // Check if the user is the same as the one viewing the product
-      // TODO: how what req.auth.userId saved ?
       if (foundSauce.userId != req.auth.userId) {
         res.status(401).json({ message: "Operation non authorisé" });
       }
+
       Sauce.updateOne(
         { _id: productId },
         {
           ...sauceObject,
         }
       )
-        .then(() =>
-          res.status(200).json({ message: "Object successfully modified" })
-        )
+        .then(() => {
+          const filename = foundSauce.imageUrl.split("/images/")[1];
+          fs.unlink(`images/${filename}`, () => {
+            res.status(200).json({ message: "Object successfully deleted" });
+          });
+        })
         .catch((error) => res.status(401).json(error));
     })
     .catch((error) => res.status(400).json(error));
