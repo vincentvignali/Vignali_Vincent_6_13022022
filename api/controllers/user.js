@@ -1,8 +1,19 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+const validator = require("email-validator");
+dotenv.config();
 
 exports.signup = (req, res, next) => {
+  /** --- */
+  /** Validate the email coming from the user */
+  if (!validator.validate(req.body.email)) {
+    console.log("wrong email format");
+    return res.status(401).json({ message: "Wrong email format" });
+  }
+  /** --- */
+
   bcrypt
     .hash(req.body.password, 10)
     .then((hash) => {
@@ -41,7 +52,7 @@ exports.login = (req, res, next) => {
                 {
                   userId: user._id,
                 },
-                "RANDOM_TOKEN_SECRET",
+                process.env.SECRET_TOKEN_KEY,
                 { expiresIn: "24h" }
               ),
             });

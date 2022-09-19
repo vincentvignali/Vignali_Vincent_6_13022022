@@ -54,7 +54,7 @@ exports.updateOne = (req, res, next) => {
       }
     : { ...req.body };
   console.log(sauceObject);
-  // TODO: WHY this delete ?
+
   delete sauceObject._userId;
 
   Sauce.findOne({ _id: productId })
@@ -62,7 +62,6 @@ exports.updateOne = (req, res, next) => {
       if (foundSauce.userId != req.auth.userId) {
         res.status(401).json({ message: "Operation non authorisé" });
       }
-
       Sauce.updateOne(
         { _id: productId },
         {
